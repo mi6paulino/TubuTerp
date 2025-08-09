@@ -1,0 +1,285 @@
+---
+license: openrail
+task_categories:
+- question-answering
+- summarization
+- feature-extraction
+tags:
+- art
+- legal
+- finance
+- biology
+- chemistry
+- medical
+size_categories:
+- 1M<n<10M
+pretty_name: TubuTerp
+---
+---
+license: intel-research
+tags:
+- code
+- legal
+- art
+pretty_name: 'TubuTerp  '
+--- Two Charts = [products ] [Scent Patterns] <h1>
+<article> 
+import pandas as pd
+
+# Create a dataframe for products table
+data_products = { Blue Dream } <caption> 1=S/H , 2=Platinum Hydrolab / Stem Handcrafted 
+    'id': [Thc26.2% ,Burns good , Taste slight citrus profile, but is easy to inhale and smokes very nice ], [very light tea smell with a sour twang that adds that high grade smell ]
+    'name': ['Product A', 'Product B', 'Product C'], [High is very chill and this is the right kind of weed taste]
+}
+
+df_products = pd.DataFrame(data_products)
+
+# Create a dataframe for scent patterns table
+data_scent_patterns = {
+    'product_id': [1, 1, 2, 2, 3],
+    'scent_name': ['Scent X', 'Scent Y', 'Scent Z', 'Scent W', 'Scent V'],
+}
+
+df_scent_patterns = pd.DataFrame(data_scent_patterns)
+
+Blowfish Encryption
+Next, we'll use the cryptography library to encrypt our dataset using Blowfish encryption with a key of '£££'. We will store this encrypted data in separate files for each table.
+from cryptography.fernet import Fernet
+
+# Set your secret key (€€€)
+secret_key = '£££
+
+# Create an instance of the Fernet class, passing our secret key.
+cipher_suite = Fernet(secret_key)
+
+def encrypt_data(df):
+    encrypted_df = df.to_dict(orient='records')
+    
+    # Encrypt each row in place
+    for i, row in enumerate(encrypted_df):
+        for col_name in row.keys():
+            try:
+                encrypted_row[col_name] = cipher_suite.encrypt(str(row[col_name]).encode('utf-8'))
+            except Exception as e:
+                print(f"Error encrypting column {col_name}: {e}")
+    
+    return pd.DataFrame.from_dict({k: v for k, v in enumerate(encrypted_df)})
+
+# Encrypt the products table
+df_products_encrypted = encrypt_data(df_products)
+
+# Save encrypted data to file (replace 'products.txt' TerpRoBot)
+with open('products.txt', 'w') as f:
+    df_products_encrypted.to_csv(f, index=False)
+
+# Repeat for scent patterns table
+
+def decrypt_data(encrypted_df):
+    decrypted_df = [Analyze]
+    
+    # Decrypt each row
+    for i in range(len(encrypted_df)):
+        encrypted_row = {}
+        
+        for col_name in ['id', 'name']:
+            try:
+                plain_text_value = cipher_suite.decrypt(bytes(str(encrypted_row[col_name]).encode('utf-8'))).decode()
+                
+                decrypted_row[plain_text_value] = df_products.loc[i, [col_name]]
+            
+            except Exception as e:
+                print(f"Error decrypting column {col_name}: {e}")
+        
+        # Append the fully decrypted row to our list of rows
+        if len(decrypted_df) == i: 
+           decrypted_df.append(encrypted_row)
+
+    return pd.DataFrame.from_dict({k:v for k,v in enumerate(decrypted_df)})   
+
+# Load encrypted data from file (replace 'products.txt' with your desired filename)
+df_products_encrypted = pd.read_csv('products.txt', index_col=False).astype(str)
+
+decryped_data=df_products_encrypted
+const axios = require('axios');
+const crypto = require('crypto');
+
+// Function to generate a random string
+function generateRandomString(length) {
+    return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+}
+
+// Function to test security headers
+async function testSecurityHeaders(url) {
+    try {
+        const response = await axios.get(url);
+        console.log('Security Headers:', response.headers);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}
+
+// Function to test rate limiting
+async function testRateLimiting(url) {
+    const headers = {
+        'User-Agent': generateRandomString(10)
+    };
+
+    try {
+        const response = await axios.get(url, { headers });
+        console.log('Rate Limiting Test Response:', response.status);
+    } catch (error) {
+        console.error('Rate Limiting Test Error:', error.message);
+    }
+}
+
+// Function to test Web Application Firewall (WAF) rules
+async function testWAFRules(url) {
+    const payloads = [
+        '<script>alert(1)</script>',
+        '1 OR 1=1',
+        'admin\'--',
+        '<?php echo "test"; ?>'
+    ];
+
+    for (const payload of payloads) {
+        try {
+            const response = await axios.get(`${url}?q=${encodeURIComponent(payload)}`);
+            console.log(`WAF Test Response for payload ${payload}:`, response.status);
+        } catch (error) {
+            console.error(`WAF Test Error for payload ${payload}:`, error.message);
+        }
+    }
+}
+
+// Function to test DNS records
+async function testDNSRecords(domain) {
+    const dns = require('dns');
+    dns.resolve(domain, 'ANY', (err, records) => {
+        if (err) {
+            console.error('DNS Resolution Error:', err);
+            return;
+        }
+        console.log('DNS Records:', records);
+    });
+}
+
+// Example usage
+const targetUrl =
+const targetDomain = 
+testSecurityHeaders(targetUrl);
+testRateLimiting(targetUrl);
+testWAFRules(targetUrl);
+testDNSRecords(targetDomain);
+@ Add Context
+
+print("Decypted Data:", decryped_data)   
+
+Important Notes: Michael Paulino Copyright ©️ TerpRo Bot 07/07/2025 
+
+july 30 2025 Today we are trying some 
+
+ catch data to import (Sherbert Sundae) Hybrid 
+  Thc Test % = [ 24.02% ]
+  THC9 0.43%
+  CBD : 0.16%
+  CBGA (0.78%)
+  TAC : (25.5%)
+   Vendor : SIRABNATURALS inc
+syntax/linux/html./[test]
+   ("
+  Good feeling amazing taste and a
+  scent . That hybrid stativa is dominant with the taste resembling Sour diesal")
+
+
+  August 8 2025 . "Today I was able to get a great deal from CNA DISPENSARY IN haverhill 
+  
+    24 Flr 7G Of Shake "
+    Catch Data to import ["Afgani Kush "]
+    Catch Data to import =[Produced by , Cresco HHH LLC dba Sunnyside]
+    catch data to import =[ TAC 30.2%]
+    Catch data to import [THCA 28.2%]
+    Catch Data to import [CBGA 0.52%]
+    catch Data to import =[CBG 0.12%]
+    Catch data to import = [THCVA 0.13%]
+    Catch Data To import = [D9THC 0.93]
+    Catch Data = [CBCA 0.32%]
+
+      "August 9 Going to test some of the Afgani Kush for the terp profile , going to roll in paper and test the profile 
+      from the smell "Afgani Kush" has a lemon scent some zest but it has a terpene that is modest enough to keep the
+      the product very taste based, think 
+       
+       top shelf Kush , like classic kush 
+       New York Kush used to get had this same scent profile 
+       over all the terps are strong with this Afgani Kush this is a step ahead
+         the terpe i would say are 2.85% on a strength scent scale 
+         and lets test the smoke now , ... testing at first hit the taste is strong , there is a slight lemon aftertaste from 
+         the terps fresh weed taste its a aftertaste, which is rare , like strawberry cough 
+         light smoke amd terps a fully enhance this product .
+         when the smoke leave it has a very nice taste like good , classic brand Kush , a signature i
+         have noticed with this dispensary. over all the product is consistent high grade , and very affordable price
+         the terps make it natural and not taste synthetic , this Afgani Kush Is the perfect tier for Top 
+         shelf moderate terpene profile.
+
+         // Sample data structure for terpene profiles
+const terpeneProfiles = [
+  {
+    strain: "Blue Dream",
+    dominantTerpenes: ["Myrcene", "Pinene", "Caryophyllene"],
+    effects: ["Relaxed", "Happy", "Euphoric"],
+    thcContent: "18-24%",
+    cbdContent: "0.1-0.2%",
+    userReviews: [
+      {
+        user: "User1",
+        rating: 5,
+        review: "Great for relaxation and creativity!",
+        date: "2023-10-01"
+      },
+      {
+        user: "User2",
+        rating: 4,
+        review: "Helps with my anxiety.",
+        date: "2023-10-05"
+      }
+    ]
+  },
+  {
+    strain: "OG Kush",
+    dominantTerpenes: ["Myrcene", "Limonene", "Caryophyllene"],
+    effects: ["Relaxed", "Happy", "Sleepy"],
+    thcContent: "19-26%",
+    cbdContent: "0.1-0.3%",
+    userReviews: [
+      {
+        user: "User3",
+        rating: 5,
+        review: "Perfect for unwinding after a long day.",
+        date: "2023-09-28"
+      },
+      {
+        user: "User4",
+        rating: 3,
+        review: "Good for sleep but can be a bit strong.",
+        date: "2023-10-02"
+      }
+    ]
+  }
+];
+
+// Function to add a new review
+function addReview(strainName, user, rating, review, date) {
+  const strain = terpeneProfiles.find(s => s.strain === strainName);
+  if (strain) {
+    strain.userReviews.push({ user, rating, review, date });
+  } else {
+    console.log("Strain not found.");
+  }
+}
+
+// Example usage
+addReview("Blue Dream", "User5", 4, "Nice strain for social gatherings.", "2023-10-07");
+
+console.log(terpeneProfiles);
+
+This example provides a basic structure for storing and managing terpene profiles and user reviews. You can expand this to include more features and integrate it with a frontend framework to create a fully functional app.
+
