@@ -1,0 +1,484 @@
+Backend (Flask with ECC Encryption)
+
+install the ecdsa library for ECC encryption:
+
+
+
+pip install ecdsa 
+
+//
+encryption:
+
+
+
+# app.py
+from flask import Flask, request, jsonify, render_template
+from flask_sqlalchemy import SQLAlchemy
+from flask_restful import Api, Resource
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from ecdsa import SigningKey, NIST256p
+import base64
+import os
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///terpene_profiler.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Change this!
+
+db = SQLAlchemy(app)
+api = Api(app)
+jwt = JWTManager(app)
+
+# Generate ECC key pair
+def generate_ecc_key_pair():
+    private_key = SigningKey.generate(curve=NIST256p)
+    public_key = private_key.get_verifying_key()
+    return private_key, public_key
+
+private_key, public_key = generate_ecc_key_pair()
+
+# ECC Encryption and Decryption Functions
+def sign_data(data):
+    signature = private_key.sign(data.encode())
+    return base64.b64encode(signature).decode('utf-8')
+
+def verify_signature(data, signature):
+    try:
+        public_key.verify(base64.b64decode(signature), data.encode())
+        return True
+    except:
+        return False
+
+# Models
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False)  # Store encrypted password
+
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    terpene_profile = db.Column(db.String(500), nullable=False)
+
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    review_text = db.Column(db.String(500), nullable=False)
+
+# Resources
+class Register(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        hashed_password = generate_password_hash(password)
+        signature = sign_data(hashed_password)
+
+        new_user = User(username=username, password=signature)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return {'message': 'User registered successfully'}, 201
+
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+
+        user = User.query.filter_by(username=username).first()
+        if user:
+            hashed_password = generate_password_hash(password)
+            if verify_signature(hashed_password, user.password):
+                access_token = create_access_token(identity=user.id)
+                return {'message': 'Login successful', 'access_token': access_token}, 200
+        return {'message': 'Invalid username or password'}, 401
+
+class ProductList(Resource):
+    def get(self):
+        products = Product.query.all()
+        products_list = [{'id': product.id, 'name': product.name, 'description': product.description, 'terpene_profile': product.terpene_profile} for product in products]
+        return products_list, 200
+
+    @jwt_required()
+    def post(self):
+        data = request.get_json()
+        new_product = Product(name=data.get('name'), description=data.get('description'), terpene_profile=data.get('terpene_profile'))
+        db.session.add(new_product)
+        db.session.commit()
+        return {'message': 'Product added successfully'}, 201
+
+class ReviewList(Resource):
+    @jwt_required()
+    def post(self):
+        data = request.get_json()
+        new_review = Review(user_id=get_jwt_identity(), product_id=data.get('product_id'), rating=data.get('rating'), review_text=data.get('review_text'))
+        db.session.add(new_review)
+        db.session.commit()
+        return {'message': 'Review added successfully'}, 201
+
+# Add resources to API
+api.add_resource(Register, '/register')
+api.add_resource(Login, '/login')
+api.add_resource(ProductList, '/products')
+api.add_resource(ReviewList, '/reviews')
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
+
+Solidity Smart Contract
+
+Solidity smart contract with a sudo counter 
+
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract DataManager {
+    address public sudo;
+    uint256 public sudoCounter;
+
+    struct Product {
+        uint256 id;
+        string name;
+        string description;
+        string terpeneProfile;
+    }
+
+    mapping(uint256 => Product) public products;
+    uint256 public productCount;
+
+    event ProductAdded(uint256 id, string name, string description, string terpeneProfile);
+
+    constructor() {
+        sudo = msg.sender;
+        sudoCounter = 0;
+        productCount = 0;
+    }
+
+    modifier onlySudo() {
+        require(msg.sender == sudo, "Only sudo can perform this action");
+        _;
+    }
+
+    function addProduct(string memory name, string memory description, string memory terpeneProfile) public onlySudo {
+        productCount++;
+        products[productCount] = Product(productCount, name, description, terpeneProfile);
+        emit ProductAdded(productCount, name, description, terpeneProfile);
+        sudoCounter++;
+    }
+
+    function getProduct(uint256 id) public view returns (uint256, string memory, string memory, string memory) {
+        require(id > 0 && id <= productCount, "Invalid product ID");
+        Product memory product = products[id];
+        return (product.id, product.name, product.description, product.terpeneProfile);
+    }
+
+    function getSudoCounter() public view returns (uint256) {
+        return sudoCounter;
+    }
+}
+
+Frontend (HTML/CSS/JavaScript with Fetch API)
+
+
+
+
+
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terpene Profiler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #35424a;
+            color: white;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #e8491d 3px solid;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+        }
+        header li {
+            display: inline;
+            padding: 0 20px 0 20px;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #35424a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .product, .review {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Terpene Profiler</h1>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Products</a></li>
+                <li><a href="#">Reviews</a></li>
+                <li><a href="#" onclick="showLoginForm()">Login</a></li>
+                <li><a href="#" onclick="showRegisterForm()">Register</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div id="loginForm" style="display: none;">
+                <h2>Login</h2>
+                <form id="login">
+                    <div class="form-group">
+                        <label for="loginUsername">Username:</label>
+                        <input type="text" id="loginUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" name="password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+            </div>
+
+            <div id="registerForm" style="display: none;">
+                <h2>Register</h2>
+                <form id="register">
+                    <div class="form-group">
+                        <label for="registerUsername">Username:</label>
+                        <input type="text" id="registerUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password:</label>
+                        <input type="password" id="registerPassword" name="password" required>
+                    </div>
+                    <button type="submit">Register</button>
+                </form>
+            </div>
+
+            <div id="addProductForm">
+                <h2>Add Product</h2>
+                <form id="addProduct">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="terpene_profile">Terpene Profile:</label>
+                        <input type="text" id="terpene_profile" name="terpene_profile" required>
+                    </div>
+                    <button type="submit">Add Product</button>
+                </form>
+            </div>
+
+            <h2>Products</h2>
+            <div id="products">
+                <!-- Products will be loaded here -->
+            </div>
+
+            <div id="addReviewForm">
+                <h2>Add Review</h2>
+                <form id="addReview">
+                    <div class="form-group">
+                        <label for="product_id">Product ID:</label>
+                        <input type="text" id="product_id" name="product_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rating">Rating:</label>
+                        <input type="number" id="rating" name="rating" min="1" max="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="review_text">Review:</label>
+                        <textarea id="review_text" name="review_text" required></textarea>
+                    </div>
+                    <button type="submit">Add Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let accessToken = '';
+
+        document.getElementById('login').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.access_token) {
+                    accessToken = data.access_token;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('register').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('addProduct').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const terpene_profile = document.getElementById('terpene_profile').value;
+
+            fetch('/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({ name, description, terpene_profile })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                loadProducts();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('addReview').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const product_id = document.getElementById('product_id').value;
+            const rating = document.getElementById('rating').value;
+            const review_text = document.getElementById('review_text').value;
+
+            fetch('/reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({ product_id, rating, review_text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        function loadProducts() {
+            fetch('/products')
+            .then(response => response.json())
+            .then(data => {
+                const productsDiv = document.getElementById('products');
+                productsDiv.innerHTML = '';
+                data.forEach(product => {
+                    const productDiv = document.createElement('div');
+                    productDiv.className = 'product';
+                    productDiv.innerHTML = `
+                        <h3>${product.name}</h3>
+                        <p>${product.description}</p>
+                        <p>Terpene Profile: ${product.terpene_profile}</p>
+                    `;
+                    productsDiv.appendChild(productDiv);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>
+
+This code is advanced terpene profiler app with ECC encryption for protecting sensitive data and a Solidity smart contract for managing data with a sudo counter.
+by michael paulino august 11 2025
