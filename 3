@@ -1,0 +1,182 @@
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { insertStrainSchema, insertReviewSchema, insertPreferenceSchema } from "@shared/schema";
+import { z } from "zod";
+
+const matchPreferencesSchema = z.object({
+  effects: z.array(z.string()),
+  intensity: z.string(),
+  timeOfUse: z.string()
+});
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Terpenes endpoints
+  app.get("/api/terpenes", async (req, res) => {
+    try {
+      const terpenes = await storage.getAllTerpenes();
+      res.json(terpenes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch terpenes" });
+    }
+  });
+
+  app.get("/api/terpenes/:id", async (req, res) => {
+    try {
+      const terpene = await storage.getTerpene(req.params.id);
+      if (!terpene) {
+        return res.status(404).json({ message: "Terpene not found" });
+      }
+      res.json(terpene);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch terpene" });
+    }
+  });
+
+  // Strains endpoints
+  app.get("/api/strains", async (req, res) => {
+    try {
+      const { type, effect, terpene } = req.query;
+      
+      let strains;
+      if (type) {
+        strains = await storage.getStrainsByType(type as string);
+      } else if (effect) {
+        strains = await storage.getStrainsByEffect(effect as string);
+      } else if (terpene) {
+        strains = await storage.getStrainsByTerpene(terpene as string);
+      } else {
+        strains = await storage.getAllStrains();
+      }
+      
+      res.json(strains);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch strains" });
+    }
+  });
+
+  app.get("/api/strains/:id", async (req, res) => {
+    try {
+      const strain = await storage.getStrain(req.params.id);
+      if (!strain) {
+        return res.status(404).json({ message: "Strain not found" });
+      }
+      res.json(strain);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch strain" });
+    }
+  });
+
+  app.post("/api/strains", async (req, res) => {
+    try {
+      const validatedData = insertStrainSchema.parse(req.body);
+      const strain = await storage.createStrain(validatedData);
+      res.status(201).json(strain);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid strain data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create strain" });
+    }
+  });
+
+  // Reviews endpoints
+  app.get("/api/reviews/strain/:strainId", async (req, res) => {
+    try {
+      const reviews = await storage.getReviewsForStrain(req.params.strainId);
+      res.json(reviews);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.post("/api/reviews", async (req, res) => {
+    try {
+      const validatedData = insertReviewSchema.parse(req.body);
+      const review = await storage.createReview(validatedData);
+      res.status(201).json(review);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid review data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  app.patch("/api/reviews/:id/helpful", async (req, res) => {
+    try {
+      const { count } = req.body;
+      await storage.updateReviewHelpful(req.params.id, count);
+      res.json({ message: "Review updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update review" });
+    }
+  });
+
+  // Preference matching endpoint
+  app.post("/api/preferences/match", async (req, res) => {
+    try {
+      const { effects, intensity, timeOfUse } = matchPreferencesSchema.parse(req.body);
+      
+      // Get all strains and filter based on preferences
+      const allStrains = await storage.getAllStrains();
+      
+      // Score strains based on matching effects
+      const scoredStrains = allStrains.map(strain => {
+        let score = 0;
+        
+        // Add points for matching effects
+        effects.forEach(effect => {
+          if (strain.primaryEffects.some(e => e.toLowerCase().includes(effect.toLowerCase()))) {
+            score += 3;
+          }
+        });
+        
+        // Adjust score based on intensity preference and strain type
+        if (intensity === "mild" && strain.type === "hybrid") score += 1;
+        if (intensity === "moderate" && (strain.type === "hybrid" || strain.type === "indica")) score += 1;
+        if (intensity === "strong" && strain.type === "sativa") score += 1;
+        
+        // Adjust score based on time of use
+        if (timeOfUse === "morning" && strain.primaryEffects.includes("Energizing")) score += 2;
+        if (timeOfUse === "afternoon" && strain.type === "hybrid") score += 1;
+        if (timeOfUse === "evening" && strain.primaryEffects.includes("Relaxing")) score += 2;
+        
+        return { ...strain, matchScore: score };
+      });
+      
+      // Sort by score and return top matches
+      const matches = scoredStrains
+        .filter(strain => strain.matchScore > 0)
+        .sort((a, b) => b.matchScore - a.matchScore)
+        .slice(0, 10);
+        
+      res.json(matches);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid preference data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to match preferences" });
+    }
+  });
+
+  // Dispensaries endpoints
+  app.get("/api/dispensaries", async (req, res) => {
+    try {
+      const { city } = req.query;
+      
+      let dispensaries;
+      if (city) {
+        dispensaries = await storage.getDispensariesByCity(city as string);
+      } else {
+        dispensaries = await storage.getAllDispensaries();
+      }
+      
+      res.json(dispensaries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch dispensaries" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
