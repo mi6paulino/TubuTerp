@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(220 14.3% 15.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(220 14.3% 15.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(220 14.3% 15.9%);
+  --primary: hsl(168 76% 36%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(140 67% 43%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(220 14.3% 95.9%);
+  --muted-foreground: hsl(220 8.9% 46.1%);
+  --accent: hsl(37 91% 55%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(220 13% 91%);
+  --input: hsl(220 13% 91%);
+  --ring: hsl(168 76% 36%);
+  --chart-1: hsl(168 76% 36%);
+  --chart-2: hsl(140 67% 43%);
+  --chart-3: hsl(37 91% 55%);
+  --chart-4: hsl(43 96% 56%);
+  --chart-5: hsl(155 64% 50%);
+  --sidebar: hsl(0 0% 100%);
+  --sidebar-foreground: hsl(220 14.3% 15.9%);
+  --sidebar-primary: hsl(168 76% 36%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(220 14.3% 95.9%);
+  --sidebar-accent-foreground: hsl(220 14.3% 15.9%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(168 76% 36%);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 1rem;
+  
+  /* Custom terpene colors */
+  --terpene-myrcene: hsl(168 76% 36%);
+  --terpene-limonene: hsl(140 67% 43%);
+  --terpene-pinene: hsl(37 91% 55%);
+  --terpene-caryophyllene: hsl(0 84% 60%);
+  --terpene-terpinolene: hsl(43 96% 56%);
+  --terpene-linalool: hsl(271 81% 56%);
+  
+  /* Dark color scheme */
+  --dark: hsl(210 11% 15%);
+  --success: hsl(140 67% 43%);
+  --warning: hsl(43 96% 56%);
+  --danger: hsl(0 84% 60%);
+}
+
+.dark {
+  --background: hsl(220 14.3% 4.1%);
+  --foreground: hsl(210 20% 98%);
+  --card: hsl(220 14.3% 4.1%);
+  --card-foreground: hsl(210 20% 98%);
+  --popover: hsl(220 14.3% 4.1%);
+  --popover-foreground: hsl(210 20% 98%);
+  --primary: hsl(168 76% 36%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(140 67% 43%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(215 27.9% 16.9%);
+  --muted-foreground: hsl(217.9 10.6% 64.9%);
+  --accent: hsl(215 27.9% 16.9%);
+  --accent-foreground: hsl(210 20% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(210 20% 98%);
+  --border: hsl(215 27.9% 16.9%);
+  --input: hsl(215 27.9% 16.9%);
+  --ring: hsl(168 76% 36%);
+  --chart-1: hsl(220 70% 50%);
+  --chart-2: hsl(160 60% 45%);
+  --chart-3: hsl(30 80% 55%);
+  --chart-4: hsl(280 65% 60%);
+  --chart-5: hsl(340 75% 55%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  .terpene-myrcene {
+    @apply bg-primary text-white;
+  }
+  .terpene-limonene {
+    @apply bg-secondary text-white;
+  }
+  .terpene-pinene {
+    @apply bg-accent text-white;
+  }
+  .terpene-caryophyllene {
+    @apply bg-destructive text-white;
+  }
+  .terpene-terpinolene {
+    @apply bg-warning text-white;
+  }
+  .terpene-linalool {
+    @apply bg-purple-500 text-white;
+  }
+  
+  .effect-relaxing {
+    @apply text-primary;
+  }
+  .effect-energizing {
+    @apply text-accent;
+  }
+  .effect-focus {
+    @apply text-secondary;
+  }
+  .effect-creative {
+    @apply text-warning;
+  }
+  .effect-social {
+    @apply text-primary;
+  }
+  .effect-pain-relief {
+    @apply text-destructive;
+  }
+}
