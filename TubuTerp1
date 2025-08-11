@@ -1,0 +1,93 @@
+import { sql } from "drizzle-orm";
+import { pgTable, text, varchar, integer, real, boolean, jsonb } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+export const terpenes = pgTable("terpenes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  description: text("description").notNull(),
+  aromaProfile: text("aroma_profile").array().notNull(),
+  effects: text("effects").array().notNull(),
+  foundInPercentage: integer("found_in_percentage").notNull(),
+  alsoFoundIn: text("also_found_in").array().notNull(),
+  icon: text("icon").notNull().default("fas fa-seedling"),
+  color: text("color").notNull().default("#16A085"),
+});
+
+export const strains = pgTable("strains", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // sativa, indica, hybrid
+  genetics: text("genetics"),
+  description: text("description").notNull(),
+  dominantTerpenes: jsonb("dominant_terpenes").notNull(), // Array of {name: string, percentage: number}
+  primaryEffects: text("primary_effects").array().notNull(),
+  thcContent: real("thc_content"),
+  cbdContent: real("cbd_content"),
+  averageRating: real("average_rating").default(0),
+  reviewCount: integer("review_count").default(0),
+  imageUrl: text("image_url"),
+});
+
+export const reviews = pgTable("reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  strainId: varchar("strain_id").notNull(),
+  rating: integer("rating").notNull(),
+  content: text("content").notNull(),
+  effects: text("effects").array().notNull(),
+  helpfulCount: integer("helpful_count").default(0),
+  replyCount: integer("reply_count").default(0),
+  createdAt: text("created_at").notNull(),
+});
+
+export const preferences = pgTable("preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  desiredEffects: text("desired_effects").array().notNull(),
+  intensity: text("intensity").notNull(), // mild, moderate, strong
+  timeOfUse: text("time_of_use").notNull(), // morning, afternoon, evening
+  avoidedEffects: text("avoided_effects").array(),
+});
+
+export const dispensaries = pgTable("dispensaries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  phone: text("phone"),
+  website: text("website"),
+  rating: real("rating").default(0),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export const insertTerpeneSchema = createInsertSchema(terpenes).omit({ id: true });
+export const insertStrainSchema = createInsertSchema(strains).omit({ id: true, averageRating: true, reviewCount: true });
+export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, helpfulCount: true, replyCount: true });
+export const insertPreferenceSchema = createInsertSchema(preferences).omit({ id: true });
+export const insertDispensarySchema = createInsertSchema(dispensaries).omit({ id: true, rating: true });
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Terpene = typeof terpenes.$inferSelect;
+export type InsertTerpene = z.infer<typeof insertTerpeneSchema>;
+export type Strain = typeof strains.$inferSelect;
+export type InsertStrain = z.infer<typeof insertStrainSchema>;
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Preference = typeof preferences.$inferSelect;
+export type InsertPreference = z.infer<typeof insertPreferenceSchema>;
+export type Dispensary = typeof dispensaries.$inferSelect;
+export type InsertDispensary = z.infer<typeof insertDispensarySchema>;
+
+
+
+
